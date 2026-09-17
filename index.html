@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#28262f">
+  <meta name="description" content="准点：一个轻量、离线、手机可安装的任务提醒程序。">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="准点">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="./icons/icon.svg">
+  <link rel="apple-touch-icon" href="./icons/icon-180.png">
+  <link rel="stylesheet" href="./styles.css">
+  <title>准点 · 任务提醒</title>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="hero">
+      <div class="hero-orb hero-orb-one"></div>
+      <div class="hero-orb hero-orb-two"></div>
+
+      <div class="topbar">
+        <a class="brand" href="#" aria-label="回到任务首页">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 32 32" role="img">
+              <path d="M8.7 16.7l4.2 4.2 10.4-10.4" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <span class="brand-copy">
+            <strong>准点</strong>
+            <small>把每件小事按时做完</small>
+          </span>
+        </a>
+        <button class="icon-button" id="settingsTopButton" type="button" aria-label="打开设置">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 8.6 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.1-.4H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.6 8.6a1.7 1.7 0 0 0-.34-1.88l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1.1V3a2 2 0 1 1 4 0v.1A1.7 1.7 0 0 0 15.4 4.6a1.7 1.7 0 0 0 1.88-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9c.13.4.34.75.6 1 .3.3.7.47 1.1.5h.1a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.7.5Z"/></svg>
+        </button>
+      </div>
+
+      <section class="hero-summary" aria-labelledby="greetingText">
+        <div class="summary-copy">
+          <p class="date-line" id="todayDate"></p>
+          <h1 id="greetingText">今天也要稳稳完成</h1>
+          <p class="summary-line" id="summaryText">还没有任务，先添加一件吧。</p>
+        </div>
+        <div class="progress-ring" id="progressRing" aria-label="今日完成进度">
+          <div class="progress-ring-inner">
+            <strong id="progressPercent">0%</strong>
+            <span>今日完成</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="quick-stats" aria-label="任务概览">
+        <button class="stat-card" type="button" data-filter-jump="active">
+          <span class="stat-value" id="activeCount">0</span>
+          <span class="stat-label">待完成</span>
+        </button>
+        <button class="stat-card" type="button" data-filter-jump="overdue">
+          <span class="stat-value danger" id="overdueCount">0</span>
+          <span class="stat-label">已逾期</span>
+        </button>
+        <button class="stat-card" type="button" data-filter-jump="completed">
+          <span class="stat-value success" id="completedCount">0</span>
+          <span class="stat-label">今日完成</span>
+        </button>
+      </section>
+    </header>
+
+    <main>
+      <section class="list-toolbar" aria-label="筛选任务">
+        <div class="filter-row" id="filterRow">
+          <button class="filter-chip" type="button" data-filter="all">全部</button>
+          <button class="filter-chip is-active" type="button" data-filter="today">今天</button>
+          <button class="filter-chip" type="button" data-filter="upcoming">接下来</button>
+          <button class="filter-chip" type="button" data-filter="overdue">逾期</button>
+          <button class="filter-chip" type="button" data-filter="completed">已完成</button>
+        </div>
+        <button class="search-toggle" id="searchToggle" type="button" aria-expanded="false" aria-controls="searchPanel" aria-label="搜索任务">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+        </button>
+      </section>
+
+      <section class="search-panel" id="searchPanel" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+        <input id="searchInput" type="search" placeholder="搜索任务、分类或备注" autocomplete="off">
+        <button id="clearSearchButton" type="button" aria-label="清除搜索">×</button>
+      </section>
+
+      <section class="task-list" id="taskList" aria-live="polite"></section>
+    </main>
+  </div>
+
+  <nav class="bottom-nav" aria-label="主导航">
+    <button class="nav-item is-active" type="button" data-filter="today">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v15H4z"/><path d="M8 3v4M16 3v4M4 10h16"/><path d="M8 14h2M14 14h2M8 17h2"/></svg>
+      <span>今天</span>
+    </button>
+    <button class="nav-item" type="button" data-filter="upcoming">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v15H4z"/><path d="M8 3v4M16 3v4M4 10h16"/><path d="m9 15 2 2 4-4"/></svg>
+      <span>计划</span>
+    </button>
+    <button class="nav-add" id="addTaskButton" type="button" aria-label="添加任务">
+      <span aria-hidden="true">+</span>
+    </button>
+    <button class="nav-item" type="button" data-filter="completed">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11.1V12a8 8 0 1 1-4.7-7.3"/><path d="m9 11 3 3L21 5"/></svg>
+      <span>完成</span>
+    </button>
+    <button class="nav-item" id="settingsNavButton" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 8.6 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.1-.4H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.6 8.6a1.7 1.7 0 0 0-.34-1.88l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1.1V3a2 2 0 1 1 4 0v.1A1.7 1.7 0 0 0 15.4 4.6a1.7 1.7 0 0 0 1.88-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9c.13.4.34.75.6 1 .3.3.7.47 1.1.5h.1a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.7.5Z"/></svg>
+      <span>设置</span>
+    </button>
+  </nav>
+
+  <dialog class="sheet-dialog" id="taskDialog">
+    <form class="task-form" id="taskForm" method="dialog" novalidate>
+      <div class="sheet-handle" aria-hidden="true"></div>
+      <header class="sheet-header">
+        <div>
+          <p class="eyebrow" id="taskDialogEyebrow">新任务</p>
+          <h2 id="taskDialogTitle">添加一件要做的事</h2>
+        </div>
+        <button class="close-button" type="button" data-close-dialog="taskDialog" aria-label="关闭">×</button>
+      </header>
+
+      <div class="form-scroll">
+        <label class="field field-large">
+          <span>任务名称</span>
+          <input id="taskTitle" name="title" type="text" maxlength="80" placeholder="例如：给导师回复邮件" required autocomplete="off">
+        </label>
+
+        <div class="field-grid">
+          <label class="field">
+            <span>截止日期</span>
+            <input id="taskDueDate" name="dueDate" type="date" required>
+          </label>
+          <label class="field">
+            <span>截止时间</span>
+            <input id="taskDueTime" name="dueTime" type="time" required>
+          </label>
+        </div>
+
+        <label class="field">
+          <span>提醒时间</span>
+          <select id="taskReminderOffset" name="reminderOffset">
+            <option value="0">准时提醒</option>
+            <option value="5">提前 5 分钟</option>
+            <option value="15">提前 15 分钟</option>
+            <option value="30" selected>提前 30 分钟</option>
+            <option value="60">提前 1 小时</option>
+            <option value="180">提前 3 小时</option>
+            <option value="1440">提前 1 天</option>
+          </select>
+        </label>
+
+        <fieldset class="field priority-field">
+          <legend>优先级</legend>
+          <div class="segmented-control">
+            <label><input type="radio" name="priority" value="low"><span>低</span></label>
+            <label><input type="radio" name="priority" value="medium" checked><span>中</span></label>
+            <label><input type="radio" name="priority" value="high"><span>高</span></label>
+          </div>
+        </fieldset>
+
+        <div class="field-grid">
+          <label class="field">
+            <span>分类</span>
+            <input id="taskCategory" name="category" type="text" maxlength="16" list="categoryOptions" placeholder="生活" autocomplete="off">
+            <datalist id="categoryOptions">
+              <option value="学习"></option>
+              <option value="工作"></option>
+              <option value="生活"></option>
+              <option value="运动"></option>
+              <option value="重要"></option>
+            </datalist>
+          </label>
+          <label class="field">
+            <span>重复</span>
+            <select id="taskRepeat" name="repeat">
+              <option value="none">不重复</option>
+              <option value="daily">每天</option>
+              <option value="weekly">每周</option>
+              <option value="monthly">每月</option>
+            </select>
+          </label>
+        </div>
+
+        <label class="field">
+          <span>备注（可选）</span>
+          <textarea id="taskNotes" name="notes" rows="3" maxlength="300" placeholder="要准备什么、在哪里完成……"></textarea>
+        </label>
+      </div>
+
+      <footer class="sheet-actions">
+        <button class="button button-ghost" type="button" data-close-dialog="taskDialog">取消</button>
+        <button class="button button-primary" id="saveTaskButton" type="submit">保存任务</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <dialog class="reminder-dialog" id="reminderDialog">
+    <div class="reminder-glow" aria-hidden="true"></div>
+    <div class="reminder-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>
+    </div>
+    <p class="eyebrow">任务提醒</p>
+    <h2 id="reminderTitle">该做这件事了</h2>
+    <p class="reminder-time" id="reminderTime"></p>
+    <p class="reminder-note" id="reminderNote" hidden></p>
+    <div class="reminder-actions">
+      <button class="button button-primary" id="reminderDoneButton" type="button">完成了</button>
+      <button class="button button-soft" id="reminderSnoozeButton" type="button">10 分钟后提醒</button>
+      <button class="text-button" id="reminderCloseButton" type="button">先关闭</button>
+    </div>
+  </dialog>
+
+  <dialog class="sheet-dialog calendar-dialog" id="calendarDialog">
+    <section class="calendar-sheet">
+      <div class="sheet-handle" aria-hidden="true"></div>
+      <header class="sheet-header">
+        <div>
+          <p class="eyebrow">系统日程</p>
+          <h2>把任务加入手机日历</h2>
+        </div>
+        <button class="close-button" type="button" data-close-dialog="calendarDialog" aria-label="关闭">×</button>
+      </header>
+      <div class="calendar-preview">
+        <span class="calendar-preview-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M4 5h16v15H4z"/><path d="M8 3v4M16 3v4M4 10h16"/><path d="m9 15 2 2 4-4"/></svg>
+        </span>
+        <div>
+          <h3 id="calendarTaskTitle">任务名称</h3>
+          <p id="calendarTaskTime">截止时间</p>
+        </div>
+      </div>
+      <div class="calendar-actions">
+        <button class="button button-primary" id="systemCalendarButton" type="button">用系统日历打开</button>
+        <a class="button button-soft calendar-link" id="googleCalendarLink" href="#" target="_blank" rel="noopener">添加到 Google 日历</a>
+        <button class="button button-ghost" id="downloadIcsButton" type="button">下载 .ics 文件</button>
+      </div>
+      <p class="calendar-help">系统日历会独立负责闹钟提醒，应用关闭后也能按时弹出并根据手机设置震动。</p>
+    </section>
+  </dialog>
+
+  <dialog class="sheet-dialog settings-dialog" id="settingsDialog">
+    <section class="settings-sheet">
+      <div class="sheet-handle" aria-hidden="true"></div>
+      <header class="sheet-header">
+        <div>
+          <p class="eyebrow">偏好设置</p>
+          <h2>让提醒更适合你</h2>
+        </div>
+        <button class="close-button" type="button" data-close-dialog="settingsDialog" aria-label="关闭">×</button>
+      </header>
+
+      <div class="settings-scroll">
+        <section class="settings-group">
+          <div class="settings-title-row">
+            <div>
+              <h3>通知与声音</h3>
+              <p>首次使用需允许浏览器通知权限。</p>
+            </div>
+            <span class="status-badge" id="notificationStatus">未开启</span>
+          </div>
+          <div class="settings-actions">
+            <button class="button button-primary button-small" id="enableNotificationsButton" type="button">开启通知</button>
+            <button class="button button-soft button-small" id="testNotificationButton" type="button">测试提醒</button>
+          </div>
+          <label class="toggle-row">
+            <span>
+              <strong>提醒音</strong>
+              <small>应用打开时播放提示音</small>
+            </span>
+            <input id="soundToggle" type="checkbox" checked>
+            <i aria-hidden="true"></i>
+          </label>
+          <label class="toggle-row">
+            <span>
+              <strong>震动提醒</strong>
+              <small>安卓收到提醒时震动，也可关闭声音只震动</small>
+            </span>
+            <input id="vibrationToggle" type="checkbox" checked>
+            <i aria-hidden="true"></i>
+          </label>
+        </section>
+
+        <section class="settings-group">
+          <div class="settings-title-row">
+            <div>
+              <h3>后台提醒</h3>
+              <p>安卓安装后可使用系统定期检查；iPhone 建议同时导出到日历。</p>
+            </div>
+          </div>
+          <button class="wide-action" id="backgroundPermissionButton" type="button">
+            <span>
+              <strong id="backgroundButtonTitle">启用后台检查</strong>
+              <small id="backgroundButtonSubtitle">支持 Android Chrome 等浏览器</small>
+            </span>
+            <span aria-hidden="true">›</span>
+          </button>
+        </section>
+
+        <section class="settings-group">
+          <div class="settings-title-row">
+            <div>
+              <h3>外观</h3>
+              <p>选择适合白天或夜晚的显示方式。</p>
+            </div>
+          </div>
+          <div class="theme-options" id="themeOptions">
+            <label><input type="radio" name="theme" value="system" checked><span>跟随系统</span></label>
+            <label><input type="radio" name="theme" value="light"><span>浅色</span></label>
+            <label><input type="radio" name="theme" value="dark"><span>深色</span></label>
+          </div>
+        </section>
+
+        <section class="settings-group">
+          <div class="settings-title-row">
+            <div>
+              <h3>数据与应用</h3>
+              <p>任务只保存在这台设备的浏览器中。</p>
+            </div>
+          </div>
+          <button class="wide-action" id="installAppButton" type="button">
+            <span>
+              <strong>安装到手机桌面</strong>
+              <small id="installHint">像普通 App 一样打开</small>
+            </span>
+            <span aria-hidden="true">›</span>
+          </button>
+          <div class="settings-actions wrap-actions">
+            <button class="button button-soft button-small" id="exportDataButton" type="button">导出备份</button>
+            <button class="button button-soft button-small" id="importDataButton" type="button">导入备份</button>
+            <button class="button button-danger button-small" id="clearDataButton" type="button">清空全部</button>
+          </div>
+          <input id="importFileInput" type="file" accept="application/json,.json" hidden>
+        </section>
+
+        <p class="version-line">准点 v1.1 · 后台检查 · 系统日历 · 震动提醒</p>
+      </div>
+    </section>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">
+    <span id="toastMessage"></span>
+    <button id="toastAction" type="button" hidden></button>
+  </div>
+
+  <script src="./app.js" defer></script>
+</body>
+</html>
